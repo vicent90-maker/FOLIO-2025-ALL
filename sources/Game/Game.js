@@ -44,6 +44,7 @@ import { Reveal } from './Reveal.js'
 import { KonamiCode } from './KonamiCode.js'
 import { Achievements } from './Achievements.js'
 import { Notifications } from './Notifications.js'
+import { Accounts } from './Accounts.js'
 import { Quality } from './Quality.js'
 import { Menu } from './Menu.js'
 import { Title } from './Title.js'
@@ -90,6 +91,7 @@ export class Game
         this.inputs = new Inputs([], [ 'intro' ])
         this.audio = new Audio()
         this.notifications = new Notifications()
+        this.accounts = new Accounts()
         this.rayCursor = new RayCursor()
         this.viewport = new Viewport(this.domElement)
         this.modals = new Modals()

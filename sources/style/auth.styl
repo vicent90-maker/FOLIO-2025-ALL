@@ -1,0 +1,139 @@
+// 账号：登录 / 注册覆盖层（本地版账号系统）
+.auth
+    display none
+    position fixed
+    top 0
+    left 0
+    width 100%
+    height 100%
+    align-items center
+    justify-content center
+    z-index 20
+    color #ffffff
+    background alpha(#1d1721, 0.85)
+    backdrop-filter blur(6px)
+
+    &.is-visible
+        display flex
+
+    *::selection
+        color #251f2b
+        background-color #ffffff
+
+    .auth-inner
+        position relative
+        width 460px
+        max-width calc(100vw - 40px)
+        max-height calc(100vh - 40px)
+        overflow-y auto
+        padding 30px 35px 35px 35px
+        border-radius 10px
+        background radial-gradient(ellipse at top left, #251f2b, #1d1721)
+        box-shadow 0 20px 60px alpha(#000000, 0.5)
+
+        @media only screen and (max-width 520px)
+            padding 20px 22px 24px 22px
+
+    // 面板靠 is-active 切换显示
+    .auth-panel
+        display none
+
+        &.is-active
+            display block
+
+    .auth-title
+        margin-bottom 0.35em
+        font-family 'Amatic SC'
+        font-size 2.2rem
+        line-height 1em
+        text-align center
+
+    .auth-text
+        margin-bottom 1.2em
+        font-size 0.95rem
+        line-height 1.35em
+        text-align center
+        opacity 0.7
+
+    .auth-input
+        display block
+        width 100%
+        height 50px
+        margin-bottom 12px
+        padding 0 15px
+        border 1px solid alpha(#ffffff, 0.3)
+        border-radius 8px
+        background alpha(#ffffff, 0.05)
+        color #ffffff
+        font-family inherit
+        font-size 1rem
+        outline none
+        transition border-color 0.2s
+
+        &:focus
+            border-color alpha(#ffffff, 0.8)
+
+        &::placeholder
+            color alpha(#ffffff, 0.4)
+
+    .auth-error
+        min-height 1.2em
+        margin-bottom 6px
+        color #ff6a7c
+        font-size 0.9rem
+        line-height 1.2em
+        text-align center
+
+    .auth-buttons
+        display flex
+        align-items center
+        justify-content center
+        gap 10px
+        margin-top 6px
+
+        @media only screen and (max-width 520px)
+            flex-direction column
+
+// 账号 HUD：显示昵称与身份，点击 = 登出确认
+.auth-hud
+    display none
+    position absolute
+    right 60px
+    top 20px
+    padding 8px 18px
+    border 1px solid alpha(#ffffff, 0.4)
+    border-radius 18px
+    background alpha(#1d1721, 0.5)
+    color #ffffff
+    font-family inherit
+    font-size 0.95rem
+    letter-spacing 0.05em
+    line-height 1.15em
+    text-align right
+    cursor pointer
+    z-index 9
+    -webkit-user-select none
+    -moz-user-select none
+    user-select none
+
+    .name
+        display block
+        font-weight 700
+
+    .identity
+        display block
+        margin-top 2px
+        font-size 0.8rem
+        opacity 0.65
+
+    html.is-started &.is-visible
+        display block
+
+    @media only screen and (max-width 520px)
+        right 52px
+        padding 6px 14px
+        font-size 0.85rem
+
+// 登出确认框：点 HUD 后弹出，复用 .auth 的覆盖层样式，只提高层级
+.auth-logout
+    z-index 21

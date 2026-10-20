@@ -106,6 +106,9 @@
             </div>
         </button>
 
+        <!-- 账号 HUD：显示昵称与身份，点击 = 登出确认 -->
+        <button class="js-auth-hud auth-hud"></button>
+
         <!-- Menu -->
         <div class="js-menu menu">
 
@@ -893,11 +896,89 @@
                 </div>
             </div>
 
+            <!-- 领地大门：访客敲门后的审批弹窗（P0 为本地模拟审批） -->
+            <div class="js-modal modal gate" data-name="gate">
+                <div class="container">
+                    <div class="content">
+                        <button class="js-close close">
+                            <img class="icon is-default" src="ui/close.svg" loading="lazy">
+                            <span class="icon is-xbox">A</span>
+                        </button>
+
+                        <div class="title">Visitor request</div>
+
+                        <p class="text"><strong class="js-gate-visitor">Someone</strong> is knocking at your gate and wants to visit your territory.</p>
+
+                        <div class="horizontal-group">
+                            <button class="js-gate-accept button is-success">Accept</button>
+                            <button class="js-gate-reject button is-danger">Reject</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Notifications -->
         <div class="js-notifications notifications">
             <div class="js-items items"></div>
+        </div>
+
+        <!-- 领地大门：走近门口时出现的操作提示 -->
+        <div class="js-gate-hint gate-hint">Right-click to knock on the gate</div>
+
+        <!-- 账号：登录 / 注册覆盖层（本地版账号系统） -->
+        <div class="js-auth auth">
+            <div class="auth-inner">
+
+                <!-- 登录 -->
+                <div class="js-auth-panel auth-panel login is-active" data-name="login">
+                    <div class="auth-title">Sign in</div>
+                    <p class="auth-text">Enter your nickname and password to continue.</p>
+
+                    <form class="js-auth-form auth-form" data-name="login" action="#">
+                        <input class="js-auth-input js-login-name" type="text" placeholder="Nickname" autocomplete="username" maxlength="16">
+                        <input class="js-auth-input js-login-password" type="password" placeholder="Password" autocomplete="current-password">
+                        <div class="js-auth-error auth-error"></div>
+
+                        <div class="auth-buttons">
+                            <button class="js-auth-submit button is-success" type="submit">Sign in</button>
+                            <button class="js-auth-switch button" type="button" data-target="register">Create an account</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 注册：一步完成（昵称 + 密码），地块按昵称自动认领 -->
+                <div class="js-auth-panel auth-panel register" data-name="register">
+                    <div class="auth-title">Create an account</div>
+                    <p class="auth-text">Pick a nickname and a password. If the nickname matches a plot's owner, that plot becomes yours.</p>
+
+                    <form class="js-auth-form auth-form" data-name="register" action="#">
+                        <input class="js-auth-input js-register-name" type="text" placeholder="Nickname" autocomplete="username" maxlength="16">
+                        <input class="js-auth-input js-register-password" type="password" placeholder="Password" autocomplete="new-password">
+                        <div class="js-auth-error auth-error"></div>
+
+                        <div class="auth-buttons">
+                            <button class="js-auth-submit button is-success" type="submit">Create an account</button>
+                            <button class="js-auth-switch button" type="button" data-target="login">I already have an account</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 登出确认：点 HUD 后弹出，避免误触（复用 .auth 覆盖层样式） -->
+        <div class="js-auth-logout auth auth-logout">
+            <div class="auth-inner">
+                <div class="auth-title">Sign out</div>
+                <p class="auth-text">Do you want to sign out? You can sign in again anytime.</p>
+
+                <div class="auth-buttons">
+                    <button class="js-auth-logout-confirm button is-success" type="button">Sign out</button>
+                    <button class="js-auth-logout-cancel button" type="button">Cancel</button>
+                </div>
+            </div>
         </div>
 
     </div>

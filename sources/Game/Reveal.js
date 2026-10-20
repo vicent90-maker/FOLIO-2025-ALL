@@ -99,16 +99,29 @@ export class Reveal
                 // Click
                 if(location.hash.match(/skip/i))
                 {
-                    this.updateStep(1)
+                    if(this.game.accounts.isLoggedIn())
+                        this.updateStep(1)
+                    else
+                        this.game.accounts.open(() => { this.updateStep(1) })
                 }
                 else
                 {
-                    // Next function
-                    const next = () =>
+                    // 真正进入游戏（登录完成后才允许）
+                    const proceed = () =>
                     {
                         this.updateStep(1)
                         this.game.inputs.events.off('introStart', inputCallback)
                         this.game.rayCursor.removeIntersect(intersect)
+                    }
+
+                    // Next function
+                    // 一进去就要登录：没登录先弹账号层，登录成功后再继续原流程
+                    const next = () =>
+                    {
+                        if(this.game.accounts.isLoggedIn())
+                            proceed()
+                        else
+                            this.game.accounts.open(proceed)
                     }
 
                     // Input callback

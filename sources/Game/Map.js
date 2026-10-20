@@ -30,6 +30,7 @@ export class Map
         this.setLocations()
         this.setPlayer()
         this.setTexture()
+        this.setTerritory()
 
         this.game.ticker.events.on('tick', () =>
         {
@@ -117,6 +118,26 @@ export class Map
                 this.texture.element.src = url
             }
         }
+    }
+
+    setTerritory()
+    {
+        const bounds = this.game.territory.bounds
+        if(!bounds)
+            return
+
+        const topLeft = this.worldToMap({ x: bounds.minX, z: bounds.minZ })
+        const bottomRight = this.worldToMap({ x: bounds.maxX, z: bounds.maxZ })
+
+        const element = document.createElement('div')
+        element.classList.add('territory')
+        element.style.left = `${topLeft.x * 100}%`
+        element.style.top = `${topLeft.y * 100}%`
+        element.style.width = `${(bottomRight.x - topLeft.x) * 100}%`
+        element.style.height = `${(bottomRight.y - topLeft.y) * 100}%`
+
+        // 插在地图贴图之后、玩家/地点标记之前，保证压在贴图上但盖不住标记
+        this.texture.element.after(element)
     }
 
     setTrigger()

@@ -120,3 +120,42 @@
 
                     .is-mode-gamepad.is-gamepad-xbox &
                         display block
+
+// 领地大门：访客审批弹窗
+.modals
+    .modal.gate
+        .content
+            max-width 420px
+            text-align center
+
+            .title
+                margin-bottom 1rem
+
+            .horizontal-group
+                margin-top 1.5rem
+                gap 20px
+
+// 领地大门：走近门口时的操作提示（HUD，不接收鼠标事件）
+.gate-hint
+    position absolute
+    left 50%
+    bottom 12%
+    transform translate(-50%, 20px)
+    padding 10px 18px
+    border-radius 8px
+    border 1px solid alpha(#ffffff, 0.2)
+    background radial-gradient(ellipse at top left, #251f2b, #1d1721)
+    color #ffffff
+    font-size 1rem
+    white-space nowrap
+    opacity 0
+    pointer-events none
+    transition opacity 0.3s, transform 0.3s
+
+    @media only screen and (max-width 440px)
+        font-size 0.85rem
+        padding 8px 14px
+
+    &.is-visible
+        opacity 1
+        transform translate(-50%, 0)
