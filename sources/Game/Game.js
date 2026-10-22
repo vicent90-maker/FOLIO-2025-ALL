@@ -52,6 +52,7 @@ import { PreRenderer } from './PreRenderer.js'
 import { Options } from './Options.js'
 import gsap from 'gsap'
 import { Map } from './Map.js'
+import { Networking } from './Networking.js'
 
 export class Game
 {
@@ -206,6 +207,7 @@ export class Game
         this.achievements = new Achievements()
         this.tornado = new Tornado()
         this.map = new Map()
+        this.networking = new Networking()
         this.title = new Title()
         // this.monitoring = new Monitoring()
         this.world.step(1)

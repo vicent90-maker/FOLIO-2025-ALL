@@ -1,3 +1,5 @@
+import plots from '../../shared/plots.json'
+
 /**
  * 全地图地块登记表（唯一登记处）
  *
@@ -14,22 +16,11 @@
  *
  * 目前只登记了玩家手绘的那块（northwest）。
  */
-export const PLOTS = [
-    {
-        id: 'northwest',
-        name: 'Northwest land',
-        description: 'The large land on the north-west side of the island.',
-        // 预定主人昵称：注册时用这个昵称的人会自动成为这块地的主人。
-        // ⚠️ 填的是你（本项目的作者）自己的注册昵称，若昵称不是 Regina 就改这一行。
-        ownerName: 'Regina',
-        bounds: {
-            minX: - 96,
-            maxX: - 37.2,
-            minZ: - 96,
-            maxZ: - 16.2,
-        },
-    },
-]
+// 数据本体在 shared/plots.json：Node 端（联机服务器）也要读同一份归属与边界，
+// 放这里一份、服务器一份容易改漏，所以统一从共享文件导入。
+//
+// ⚠️ ownerName 填的是你（本项目的作者）自己的注册昵称，若昵称不是 Regina 就改那一行。
+export const PLOTS = plots
 
 export function getPlot(_id)
 {

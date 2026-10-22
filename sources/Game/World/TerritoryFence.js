@@ -51,6 +51,9 @@ export class TerritoryFence
         this.autoCloseDistance = 15    // 走远多少米后开始计时
         this.autoCloseDelay = 2        // 计时多久自动关门
 
+        // 主人端正在处理的那条敲门请求（服务器下发的 id）
+        this.pendingKnockId = null
+
         this.setGateInteractions()
 
         this.setFromBounds()
@@ -233,18 +236,17 @@ export class TerritoryFence
             this.knock()
         })
 
-        // 审批结果（P0 为本地模拟：自己给自己弹窗）
+        // 审批按钮：结果发给服务器，由服务器广播门状态，所有人的窗口一起开/关
         this.gateModal.element.querySelector('.js-gate-accept').addEventListener('click', () =>
         {
+            this.respondKnock(true)
             this.game.modals.close()
-            this.openGate()
-            this.game.notifications.show('<div class="top"><div class="title">Access granted</div></div>', 'server-connected', 3)
         })
 
         this.gateModal.element.querySelector('.js-gate-reject').addEventListener('click', () =>
         {
+            this.respondKnock(false)
             this.game.modals.close()
-            this.game.notifications.show('<div class="top"><div class="title">Visit rejected</div></div>', 'server-disconnected', 3)
         })
 
         this.gateModal.events.on('open', () =>
@@ -253,6 +255,8 @@ export class TerritoryFence
         })
         this.gateModal.events.on('close', () =>
         {
+            // 直接叉掉弹窗 = 拒绝，别让访客一直干等
+            this.respondKnock(false)
             this.updateHint()
         })
     }
@@ -260,23 +264,125 @@ export class TerritoryFence
     // 右键按下时做什么
     knock()
     {
+        // 没有联机就没有主人可以审批，直接提示，不再自己弹窗给自己
+        if(!this.socket())
+            return this.game.notifications.show('<div class="top"><div class="title">Multiplayer server offline</div></div>', 'server-disconnected', 3)
+
         // 门开着：再按一次就关上
         if(this.gate.isOpen)
-            return this.closeGate()
+            return this.requestGate(false)
 
         // 主人，或已经在领地里面的人：直接开门，不走审批
         if(this.canOpenFreely())
-            return this.openGate()
+            return this.requestGate(true)
 
-        // 其余人：走访客审批
+        // 其余人：把请求发给服务器，由主人决定
         if(this.gateModal.isOpen)
             return
 
-        // 审批弹窗里显示访客昵称
-        const visitor = this.game.accounts.getCurrentUser()
-        this.gateModal.element.querySelector('.js-gate-visitor').textContent = visitor ? visitor.name : 'Someone'
+        this.socket().emit('knock', { plotId: this.game.territory.id })
+    }
 
+    socket()
+    {
+        const networking = this.game.networking
+
+        if(!networking || !networking.socket || !networking.socket.connected)
+            return null
+
+        return networking.socket
+    }
+
+    isMultiplayer()
+    {
+        return this.socket() !== null
+    }
+
+    // 本机想开/关门：联机时交给服务器广播，离线时只影响本地
+    requestGate(_open)
+    {
+        const socket = this.socket()
+
+        if(!socket)
+            return _open ? this.openGate() : this.closeGate()
+
+        socket.emit('gate-set', { plotId: this.game.territory.id, open: _open })
+    }
+
+    // ---- 联机事件（由 Networking 转发过来） ----
+
+    // 服务器广播的门状态：所有窗口看到同一扇门
+    onGateState(_data)
+    {
+        if(!_data || _data.plotId !== this.game.territory.id)
+            return
+
+        _data.open ? this.openGate() : this.closeGate()
+    }
+
+    // 访客端：请求已送到主人那里
+    onKnockSent()
+    {
+        this.game.notifications.show('<div class="top"><div class="title">Request sent</div><div class="text">Waiting for the owner to approve...</div></div>', 'server-connected', 4)
+    }
+
+    // 主人端：有人敲自己的门，弹审批
+    onKnockRequest(_data)
+    {
+        if(!_data || _data.plotId !== this.game.territory.id)
+            return
+
+        // 只有这块地的主人能审批，其他人收到也不处理
+        if(!this.game.accounts.ownsPlot(this.game.territory.id))
+            return
+
+        // 门本来就开着：直接放行，不用打断主人
+        if(this.gate.isOpen)
+            return this.respondKnock(true, _data.id)
+
+        this.pendingKnockId = _data.id
+        this.gateModal.element.querySelector('.js-gate-visitor').textContent = _data.visitorName || 'Someone'
         this.game.modals.open('gate')
+    }
+
+    onKnockCancelled(_data)
+    {
+        if(!_data || _data.id !== this.pendingKnockId)
+            return
+
+        this.pendingKnockId = null
+
+        if(this.gateModal.isOpen)
+            this.game.modals.close()
+    }
+
+    // 访客端：审批结果（门本身由 gate-state 广播驱动）
+    onKnockResult(_data)
+    {
+        if(!_data || _data.plotId !== this.game.territory.id)
+            return
+
+        if(_data.approved)
+            return this.game.notifications.show('<div class="top"><div class="title">Access granted</div></div>', 'server-connected', 3)
+
+        const messages = {
+            'owner-offline': 'The owner is offline',
+            'timeout': 'The owner did not respond',
+            'busy': 'Another visitor is already waiting',
+        }
+
+        this.game.notifications.show(`<div class="top"><div class="title">${messages[_data.reason] || 'Visit rejected'}</div></div>`, 'server-disconnected', 3)
+    }
+
+    respondKnock(_approved, _id = null)
+    {
+        const id = _id || this.pendingKnockId
+        this.pendingKnockId = null
+
+        if(!id)
+            return
+
+        this.socket()?.emit('knock-response', { id, approved: _approved })
     }
 
     canOpenFreely()
@@ -355,7 +461,8 @@ export class TerritoryFence
         }
 
         // 门开着且人已走远：计时 2 秒后自动关上（中途折返则重新计时）
-        if(gate.isOpen)
+        // 联机时由服务器统一计时，否则各窗口会互相把门关掉
+        if(gate.isOpen && !this.isMultiplayer())
         {
             if(distance > this.autoCloseDistance)
             {

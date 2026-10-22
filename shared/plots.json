@@ -1,0 +1,14 @@
+[
+    {
+        "id": "northwest",
+        "name": "Northwest land",
+        "description": "The large land on the north-west side of the island.",
+        "ownerName": "Regina",
+        "bounds": {
+            "minX": -96,
+            "maxX": -37.2,
+            "minZ": -96,
+            "maxZ": -16.2
+        }
+    }
+]

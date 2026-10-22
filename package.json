@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
+    "server": "node server/index.js",
     "build": "vite build --mode production",
     "preview": "vite preview",
     "compress": "node scripts/compress.js static/",
@@ -37,6 +38,8 @@
     "normalize-wheel": "^1.0.1",
     "seedrandom": "^3.0.5",
     "sharp": "^0.34.5",
+    "socket.io": "^4.8.4",
+    "socket.io-client": "^4.8.4",
     "stats-gl": "^3.6.0",
     "stylus": "^0.64.0",
     "tencentcloud-sdk-nodejs-ai3d": "^4.1.310",
