@@ -1,5 +1,6 @@
 import { clamp } from 'three/src/math/MathUtils.js'
 import { Game } from './Game.js'
+import { getPlotAt } from './TerritoryRegistry.js'
 
 export class Map
 {
@@ -19,6 +20,7 @@ export class Map
             if(!this.initiated)
                 this.init()
 
+            this.refreshPrivatePins()
             this.texture.update()
         })
     }
@@ -78,8 +80,16 @@ export class Map
             
             this.element.append(element)
 
+            // 领地：地图跳转也要服从归属规则，跳到别人的领地上是不允许的
+            item.plot = getPlotAt(respawn.position)
+            item.element = element
+
             element.addEventListener('click', () =>
             {
+                // 不是这块地的主人，点了不跳（领地只能走大门进）
+                if(item.plot && !this.game.accounts.ownsPlot(item.plot.id))
+                    return
+
                 this.game.player.respawn(item.respawnName, () =>
                 {
                     this.game.view.focusPoint.isTracking = true
@@ -138,6 +148,21 @@ export class Map
 
         // 插在地图贴图之后、玩家/地点标记之前，保证压在贴图上但盖不住标记
         this.texture.element.after(element)
+    }
+
+    // 领地是私有的：不是这块地的主人时，地图上把它标灰、点了也跳不进去
+    refreshPrivatePins()
+    {
+        for(const item of this.locations.items)
+        {
+            if(!item.plot)
+                continue
+
+            const isPrivate = !this.game.accounts.ownsPlot(item.plot.id)
+
+            item.element.classList.toggle('is-private', isPrivate)
+            item.element.title = isPrivate ? 'Private land — visitors can\'t jump inside' : ''
+        }
     }
 
     setTrigger()

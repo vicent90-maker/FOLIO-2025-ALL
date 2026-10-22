@@ -35,3 +35,16 @@ export function getPlot(_id)
 {
     return PLOTS.find((plot) => plot.id === _id) || null
 }
+
+// 某个世界坐标落在哪块地里（没落在任何地块上则返回 null）。
+// 只做矩形范围判断、不涉及归属，地图跳转与门禁都用它。
+export function getPlotAt(_coordinates)
+{
+    const x = _coordinates.x
+    const z = typeof _coordinates.z !== 'undefined' ? _coordinates.z : _coordinates.y
+
+    return PLOTS.find((plot) =>
+        x > plot.bounds.minX && x < plot.bounds.maxX &&
+        z > plot.bounds.minZ && z < plot.bounds.maxZ
+    ) || null
+}

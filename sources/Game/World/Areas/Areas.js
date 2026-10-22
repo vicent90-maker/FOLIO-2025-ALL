@@ -37,6 +37,16 @@ export class Areas
         ]
 
         const model = [...this.game.resources.areasModel.scene.children]
+
+        // 场景布局微调：赛道跳台原本横跨领地东边界（世界 x ≈ -37.2），会和围栏卡在一起，
+        // 这里在创建物理体与视觉之前先把整块跳台向东移出领地（约 10 米）
+        const circuitModel = model.find((child) => child.name.startsWith('circuit'))
+        if(circuitModel)
+        {
+            const jump = circuitModel.getObjectByName('jump')
+            if(jump)
+                jump.position.x += 10
+        }
         
         for(const child of model)
         {

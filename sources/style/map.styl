@@ -304,6 +304,16 @@
                 --size 12px
                 border-width 3px
 
+        // 私有领地：不是这块地的主人时，地图上不允许直接跳进去
+        &.is-private
+            cursor not-allowed
+
+            .pin
+                opacity 0.35
+
+            .name
+                opacity 0.5
+
         .name-container
             display flex
             justify-content center

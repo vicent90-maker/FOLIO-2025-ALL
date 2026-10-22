@@ -363,6 +363,15 @@ export class Accounts
             // 从游戏内登出后再登录的情形（open 没带回调）：直接把输入还给走路
             this.game.inputs.filters.clear()
             this.game.inputs.filters.add('wandering')
+
+            // 换了身份就送回出生点：否则主人进门后改用访客登录，会直接站在别人领地里
+            if(this.game.reveal.step >= 2)
+            {
+                this.game.player.respawn(this.game.respawns.defaultName, () =>
+                {
+                    this.game.view.focusPoint.isTracking = true
+                })
+            }
         }
     }
 
