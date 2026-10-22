@@ -51,8 +51,8 @@ export class TerritoryFence
         this.autoCloseDistance = 15    // 走远多少米后开始计时
         this.autoCloseDelay = 2        // 计时多久自动关门
 
-        // 主人端正在处理的那条敲门请求（服务器下发的 id）
-        this.pendingKnockId = null
+        // 主人端正在处理的那条敲门请求：{ plotId, visitorId }
+        this.pendingKnock = null
 
         this.setGateInteractions()
 
@@ -306,7 +306,7 @@ export class TerritoryFence
         if(!socket)
             return _open ? this.openGate() : this.closeGate()
 
-        socket.emit('gate-set', { plotId: this.game.territory.id, open: _open })
+        socket.emit('gate-set', { plotId: this.game.territory.id, isOpen: _open })
     }
 
     // ---- 联机事件（由 Networking 转发过来） ----
@@ -317,7 +317,7 @@ export class TerritoryFence
         if(!_data || _data.plotId !== this.game.territory.id)
             return
 
-        _data.open ? this.openGate() : this.closeGate()
+        _data.isOpen ? this.openGate() : this.closeGate()
     }
 
     // 访客端：请求已送到主人那里
@@ -338,19 +338,19 @@ export class TerritoryFence
 
         // 门本来就开着：直接放行，不用打断主人
         if(this.gate.isOpen)
-            return this.respondKnock(true, _data.id)
+            return this.respondKnock(true, _data)
 
-        this.pendingKnockId = _data.id
+        this.pendingKnock = { plotId: _data.plotId, visitorId: _data.visitorId }
         this.gateModal.element.querySelector('.js-gate-visitor').textContent = _data.visitorName || 'Someone'
         this.game.modals.open('gate')
     }
 
     onKnockCancelled(_data)
     {
-        if(!_data || _data.id !== this.pendingKnockId)
+        if(!_data || !this.pendingKnock || _data.plotId !== this.pendingKnock.plotId)
             return
 
-        this.pendingKnockId = null
+        this.pendingKnock = null
 
         if(this.gateModal.isOpen)
             this.game.modals.close()
@@ -374,15 +374,20 @@ export class TerritoryFence
         this.game.notifications.show(`<div class="top"><div class="title">${messages[_data.reason] || 'Visit rejected'}</div></div>`, 'server-disconnected', 3)
     }
 
-    respondKnock(_approved, _id = null)
+    // 主人答复：{ plotId, visitorId, approved }
+    respondKnock(_approved, _request = null)
     {
-        const id = _id || this.pendingKnockId
-        this.pendingKnockId = null
+        const request = _request || this.pendingKnock
+        this.pendingKnock = null
 
-        if(!id)
+        if(!request)
             return
 
-        this.socket()?.emit('knock-response', { id, approved: _approved })
+        this.socket()?.emit('knock-response', {
+            plotId: request.plotId,
+            visitorId: request.visitorId,
+            approved: _approved,
+        })
     }
 
     canOpenFreely()

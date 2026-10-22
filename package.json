@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --mode development",
     "server": "node server/index.js",
+    "start": "node server/index.js",
     "build": "vite build --mode production",
     "preview": "vite preview",
     "compress": "node scripts/compress.js static/",

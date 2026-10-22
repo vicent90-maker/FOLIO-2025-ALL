@@ -18,11 +18,11 @@ export class Networking
         this.players = new Map()
         this.sendInterval = 50
         this.lastName = null
-        this.lastPlotId = null
 
-        // 局域网测试时，别人打开 http://192.168.x.x:5173，
-        // 这里会自动连到同一台机器上的 3001 端口
-        const url = import.meta.env.VITE_MULTIPLAYER_URL || `${location.protocol}//${location.hostname}:3001`
+        // 本地开发：Vite 在 5173，服务器在 3001（别人走内网也是同一个规则）
+        // 线上：页面由服务器自己托管，WebSocket 与页面同源，不需要额外配置
+        const url = import.meta.env.VITE_MULTIPLAYER_URL
+            || (import.meta.env.DEV ? `${location.protocol}//${location.hostname}:3001` : location.origin)
         this.socket = io(url, { transports: [ 'websocket' ] })
 
         this.socket.on('connect', () => this.join())
@@ -52,25 +52,16 @@ export class Networking
         return user ? user.name : 'Visitor'
     }
 
-    // 当前账号名下的地块：服务器据此知道"谁是这块地的主人，该把审批请求发给谁"
-    get plotId()
-    {
-        const ownedPlots = this.game.accounts.getOwnedPlots()
-
-        return ownedPlots.length > 0 ? ownedPlots[0].id : null
-    }
-
     join()
     {
         this.lastName = this.name
-        this.lastPlotId = this.plotId
-        this.socket.emit('join', { name: this.lastName, plotId: this.lastPlotId })
+        this.socket.emit('join', { name: this.lastName })
     }
 
     update()
     {
-        // 游戏内换了账号：重新报一次昵称与归属
-        if(this.socket.connected && (this.name !== this.lastName || this.plotId !== this.lastPlotId))
+        // 游戏内换了账号：重新报一次昵称（服务器按昵称匹配地块主人）
+        if(this.socket.connected && this.name !== this.lastName)
             this.join()
 
         // 其他玩家平滑追赶目标位置，避免一跳一跳

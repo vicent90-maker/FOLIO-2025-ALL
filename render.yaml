@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: folio-2025
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build && npm prune --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
