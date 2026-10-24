@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22.12.0"
+
+# 游戏是单页应用：未知路径回落到 index.html；assets 与 static 资源走原文件
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

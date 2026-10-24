@@ -1,9 +1,11 @@
 services:
+  # 只跑 Socket.IO 服务端（不打包前端），内存占用极低，免费实例也不会 OOM。
+  # 前端静态页面由 Netlify 托管（见 netlify.toml），前端通过 VITE_MULTIPLAYER_URL 指向本服务。
   - type: web
     name: folio-2025
     runtime: node
     plan: free
-    buildCommand: npm ci && npm run build && npm prune --omit=dev
+    buildCommand: npm ci --omit=dev
     startCommand: npm start
     healthCheckPath: /health
     envVars:
